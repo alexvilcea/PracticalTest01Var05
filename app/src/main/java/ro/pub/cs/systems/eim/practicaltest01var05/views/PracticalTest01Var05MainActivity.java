@@ -2,7 +2,10 @@ package ro.pub.cs.systems.eim.practicaltest01var05.views;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,14 +15,24 @@ import android.widget.Toast;
 
 import ro.pub.cs.systems.eim.practicaltest01var05.R;
 import ro.pub.cs.systems.eim.practicaltest01var05.general.Constants;
+import ro.pub.cs.systems.eim.practicaltest01var05.service.PracticalTest01Var05Service;
 
 public class PracticalTest01Var05MainActivity extends AppCompatActivity {
 
-
+    private IntentFilter intentFilter = new IntentFilter();
     private TextView textView;
     private Button topLeftBtn, topRightBtn, centerBtn, bottomLeftBtn, bottomRightBtn;
     private Button navigateToSecondaryActivityButton;
     private int pressedNo;
+    private int serviceStatus;
+
+    private MessageBroadcastReceiver messageBroadcastReceiver = new MessageBroadcastReceiver();
+    private class MessageBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(Constants.BROADCAST_RECEIVER_TAG, intent.getStringExtra(Constants.BROADCAST_RECEIVER_EXTRA));
+        }
+    }
 
 
     private ButtonClickListener buttonClickListener = new ButtonClickListener();
@@ -63,6 +76,15 @@ public class PracticalTest01Var05MainActivity extends AppCompatActivity {
             }
             Log.d("MyApplication", String.valueOf(pressedNo));
 
+
+            if (pressedNo > Constants.NUMBER_OF_CLICKS_THRESHOLD
+                    && serviceStatus == Constants.SERVICE_STOPPED) {
+                Intent intent = new Intent(getApplicationContext(), PracticalTest01Var05Service.class);
+                intent.putExtra(Constants.FIRST_NUMBER, text);
+                getApplicationContext().startService(intent);
+                serviceStatus = Constants.SERVICE_STARTED;
+            }
+
         }
     }
 
@@ -89,6 +111,8 @@ public class PracticalTest01Var05MainActivity extends AppCompatActivity {
 
         navigateToSecondaryActivityButton = (Button)findViewById(R.id.navigate_to_secondary_activity_button);
         navigateToSecondaryActivityButton.setOnClickListener(buttonClickListener);
+
+            intentFilter.addAction(Constants.actionTypes);
 
     }
 
@@ -124,5 +148,25 @@ public class PracticalTest01Var05MainActivity extends AppCompatActivity {
         if (requestCode == Constants.SECONDARY_ACTIVITY_REQUEST_CODE) {
             Toast.makeText(this, "The activity returned with result " + resultCode, Toast.LENGTH_LONG).show();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        Intent intent = new Intent(this, PracticalTest01Var05Service.class);
+        stopService(intent);
+        super.onDestroy();
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(messageBroadcastReceiver, intentFilter);
+    }
+
+    @Override
+    protected void onPause() {
+        unregisterReceiver(messageBroadcastReceiver);
+        super.onPause();
     }
 }
