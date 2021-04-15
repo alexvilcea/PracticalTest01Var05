@@ -2,6 +2,7 @@ package ro.pub.cs.systems.eim.practicaltest01var05.views;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -17,7 +18,7 @@ public class PracticalTest01Var05MainActivity extends AppCompatActivity {
 
     private TextView textView;
     private Button topLeftBtn, topRightBtn, centerBtn, bottomLeftBtn, bottomRightBtn;
-
+    private Button navigateToSecondaryActivityButton;
     private int pressedNo;
 
 
@@ -52,6 +53,13 @@ public class PracticalTest01Var05MainActivity extends AppCompatActivity {
                     pressedNo++;
 
                     break;
+
+                case R.id.navigate_to_secondary_activity_button:
+                    Intent intent = new Intent(getApplicationContext(), PracticalTest01Var05SecondaryActivity.class);
+
+                    intent.putExtra(Constants.NUMBER_OF_CLICKS, text);
+                    startActivityForResult(intent, Constants.SECONDARY_ACTIVITY_REQUEST_CODE);
+                    break;
             }
             Log.d("MyApplication", String.valueOf(pressedNo));
 
@@ -79,6 +87,9 @@ public class PracticalTest01Var05MainActivity extends AppCompatActivity {
         bottomRightBtn.setOnClickListener(buttonClickListener);
         bottomLeftBtn.setOnClickListener(buttonClickListener);
 
+        navigateToSecondaryActivityButton = (Button)findViewById(R.id.navigate_to_secondary_activity_button);
+        navigateToSecondaryActivityButton.setOnClickListener(buttonClickListener);
+
     }
 
 
@@ -104,5 +115,14 @@ public class PracticalTest01Var05MainActivity extends AppCompatActivity {
         Log.d("MyApplication", String.valueOf(pressedNo));
         Toast.makeText(this, String.valueOf(pressedNo), Toast.LENGTH_LONG).show();
 
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (requestCode == Constants.SECONDARY_ACTIVITY_REQUEST_CODE) {
+            Toast.makeText(this, "The activity returned with result " + resultCode, Toast.LENGTH_LONG).show();
+        }
     }
 }

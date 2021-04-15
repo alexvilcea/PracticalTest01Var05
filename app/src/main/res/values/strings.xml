@@ -6,4 +6,6 @@
     <string name="center">CENTER</string>
     <string name="bottom_left">Bottom Left</string>
     <string name="bottom_right">"BOTTOM RIGHT "</string>
+    <string name="verify">Verify</string>
+    <string name="cancel">Cancel</string>
 </resources>
